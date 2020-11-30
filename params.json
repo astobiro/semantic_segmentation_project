@@ -1,0 +1,13 @@
+{
+	"BACKBONE" : "efficientnetb3",
+	"BATCH_SIZE" : 4,
+	"CLASSES" : ["infection"],
+	"LR" :  0.0001,
+	"EPOCHS" : 40,
+    "ACTIVATION" : "sigmoid",
+	"imgfolder": "data/datasets/dataset2D/lungs",
+	"maskfolder" : "data/datasets/dataset2D/masks",
+	"train_dataframepath" :"data/datasets/dataset2D/n1_train_dataframe.csv",
+	"test_dataframepath" :"data/datasets/dataset2D/n1_test_dataframe.csv",
+	"valid_dataframepath" :"data/datasets/dataset2D/n1_valid_dataframe.csv"
+}
