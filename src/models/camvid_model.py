@@ -4,7 +4,7 @@ SRC_ABSOLUTE_PATH = "."
 sys.path.append(SRC_ABSOLUTE_PATH)
 from generators.data_loader import Dataloder
 from generators.dataset import Dataset
-from utils import utils
+from utils.iou_calc import compute_iou_per_structure
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import cv2
@@ -21,6 +21,7 @@ import time
 class CamVidModel:
 	def __init__(self, config, dataset):
 		self.config = config
+		self.resultpath = "data/results/" + self.config.TESTNO + "/"
 		self.dataset = dataset
 		self.metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 		self.optim = keras.optimizers.Adam(self.config.LR)
@@ -45,12 +46,14 @@ class CamVidModel:
 		return focal_loss
 	def callbacksInit(self):
 		# Callbacks for training
-	    callbacks = [
-	        keras.callbacks.EarlyStopping(monitor='val_loss',patience=14),
-	        keras.callbacks.ModelCheckpoint('best_model.h5', save_weights_only=True, save_best_only=True, mode='min'),
-	        keras.callbacks.ReduceLROnPlateau(patience=7)
-	    ]
-	    return callbacks
+		csv_history_file = self.resultpath + "training_history_log.csv"
+		callbacks = [
+			keras.callbacks.EarlyStopping(monitor='val_loss',patience=14),
+			keras.callbacks.ModelCheckpoint(self.resultpath + 'best_model.h5', save_weights_only=True, save_best_only=True, mode='min'),
+			keras.callbacks.ReduceLROnPlateau(patience=7),
+			keras.callbacks.CSVLogger(csv_history_file)
+		]
+		return callbacks
 
 	def define_model(self):
 		n_classes = 1 if len(self.config.CLASSES) == 1 else (len(self.config.CLASSES) + 1)
@@ -128,7 +131,7 @@ class CamVidModel:
 		plt.ylabel('Loss')
 		plt.xlabel('Epoch')
 		plt.legend(['Train', 'Test'], loc='upper left')
-		plt.savefig("model_training_matrix.png")
+		plt.savefig(self.resultpath + "model_training_matrix.png")
 
 		return
 
@@ -138,3 +141,19 @@ class CamVidModel:
 		print("Loss: {:.5}".format(self.scores[0]))
 		for metric, value in zip(self.metrics, self.scores[1:]):
 		    print("mean {}: {:.5}".format(metric.__name__, value))
+
+	def iou_calc_save(self):
+		ious = compute_iou_per_structure(self.model, self.test_dataloader)
+		df = pd.DataFrame(data=ious)
+		df.to_csv(self.resultpath + "iou_log.csv")
+
+	def save_image_results(self):
+		ids = np.arange(len(test_dataset))
+		for i in ids:
+			image, gt_mask = test_dataset[i]
+			image = np.expand_dims(image, axis=0)
+			pr_mask = model.predict(image).round()
+
+			cv2.imwrite(self.resultpath + "raw_" + self.test_dataset.ids[i], image)
+			cv2.imwrite(self.resultpath + "gt_mask_" + self.test_dataset.ids[i], gt_mask)
+			cv2.imwrite(self.resultpath + "pr_mask_" + self.test_dataset.ids[i], pr_mask)

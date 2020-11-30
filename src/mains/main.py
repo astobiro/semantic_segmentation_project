@@ -27,11 +27,14 @@ def main():
 	dataset.showFirstImage()
 	# Construct, compile, train and evaluate the ConvNet Model.
 	model = CamVidModel(dataset.config, dataset)
+	#print(model.savepath)
 
 	model.define_model()
 
 	model.fit_model()
 
-	mode.evaluate_model()
+	model.evaluate_model()
+
+	model.iou_calc_save()
 if __name__ == '__main__':
 	main()
