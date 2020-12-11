@@ -2,7 +2,7 @@ from generators.dataset_prep import Dataprep
 from generators.dataset import Dataset
 from generators.data_loader import Dataloder
 from utils.utils import Params
-from models.segmentatil_model import SegmentationModel
+from models.camvid_model import CamVidModel
 import sys
 SRC_ABSOLUTE_PATH = "."
 sys.path.append(SRC_ABSOLUTE_PATH)
