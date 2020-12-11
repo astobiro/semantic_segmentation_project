@@ -21,7 +21,7 @@ import time
 class SegmentationModel:
 	def __init__(self, config, dataset):
 		self.config = config
-		self.resultpath = check_results_path()
+		self.resultpath = self.check_results_path()
 		self.dataset = dataset
 		self.metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 		self.optim = keras.optimizers.Adam(self.config.LR)
