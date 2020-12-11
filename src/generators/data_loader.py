@@ -6,7 +6,7 @@ class Dataloder(keras.utils.Sequence):
     
     Args:
         dataset: instance of Dataset class for image loading and preprocessing.
-        batch_size: Integet number of images in batch.
+        batch_size: Integer number of images in batch.
         shuffle: Boolean, if `True` shuffle image indexes each epoch.
     """
     

@@ -26,7 +26,7 @@ def main():
 	dataset = Dataprep(config)
 	dataset.showFirstImage()
 	# Construct, compile, train and evaluate the ConvNet Model.
-	model = CamVidModel(dataset.config, dataset)
+	model = SegmentationModel(dataset.config, dataset)
 	#print(model.savepath)
 
 	model.define_model()

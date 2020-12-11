@@ -21,7 +21,7 @@ import time
 class SegmentationModel:
 	def __init__(self, config, dataset):
 		self.config = config
-		self.resultpath = check_results_path()
+		self.resultpath = "data/results/" + self.config.TESTNO + "/"
 		self.dataset = dataset
 		self.metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 		self.optim = keras.optimizers.Adam(self.config.LR)
@@ -32,12 +32,6 @@ class SegmentationModel:
 		self.total_loss = self.dice_loss + (1*self.focal_loss)
 		self.callbacks = self.callbacksInit()
 		return
-
-	def check_results_path(self):
-		resultpath = "data/results/" + self.config.TESTNO + "/"
-		if not os.path.exists(resultpath):
-			os.mkdir(resultpath)
-		return resultpath
 
 	def modelInit(self):
 		#Initializes model variable
@@ -104,9 +98,9 @@ class SegmentationModel:
 		#Checks if the dataloader is all right
 		assert self.train_dataloader[0][0].shape == (self.config.BATCH_SIZE, self.config.IMAGE_SIZE, self.config.IMAGE_SIZE, 3)
 		assert self.train_dataloader[0][1].shape == (self.config.BATCH_SIZE, self.config.IMAGE_SIZE, self.config.IMAGE_SIZE, n_classes)
-		#Compiles model with chosen optimizer, loss and metrics
+
 		self.model.compile(self.optim, self.total_loss, self.metrics)
-		#Dataset for test images
+
 		self.test_dataset = Dataset(
 			self.dataset.images_loc, 
 			self.dataset.mask_loc,
@@ -115,15 +109,12 @@ class SegmentationModel:
 			#augmentation=get_validation_augmentation(),
 			#preprocessing=get_preprocessing(self.preprocess_input),
 		)
-		#Dataloader for test images
+
 		self.test_dataloader = Dataloder(self.test_dataset, batch_size=1, shuffle=False)
 		return
 
 	def fit_model(self):
-		#Function to train model
-		#Start time to get time to train at the end of training
 		start_time = time.time()
-		#Fits model and saves history
 		self.history = self.model.fit_generator(
 			self.train_dataloader, 
 		    steps_per_epoch=len(self.train_dataloader), 
@@ -132,7 +123,6 @@ class SegmentationModel:
 		    validation_data=self.valid_dataloader, 
 		    validation_steps=len(self.valid_dataloader),
 		)
-		#End time to get time to train at the end of training
 		end_time = time.time()
 		self.train_time = end_time - start_time
 		print( "The model took %0.3f seconds to train.\n"%self.train_time )
@@ -160,44 +150,29 @@ class SegmentationModel:
 		return
 
 	def evaluate_model(self):
-		#Function to calculate scores on the test dataset
 		self.scores = self.model.evaluate_generator(self.test_dataloader)
-		#Total loss
+
 		print("Loss: {:.5}".format(self.scores[0]))
 		loss = self.scores[0]
 		means = []
-		#Gets mean metric values
 		for metric, value in zip(self.metrics, self.scores[1:]):
 		    print("mean {}: {:.5}".format(metric.__name__, value))
 		    means.append([metric.__name__, value])
-		#Saves values on a csv
 		score = pd.DataFrame(data=[loss, means[0][1], means[1][1]], columns=["Loss", means[0][0], means[1][0]])
 		score.to_csv(self.resultpath + "loss-mean_values.csv")
 
 	def iou_calc_save(self):
-		#Function to calculate IOU for every image and save the results on a csv
 		ious = compute_iou_per_structure(self.model, self.test_dataloader)
 		df = pd.DataFrame(data=ious)
 		df.to_csv(self.resultpath + "iou_log.csv")
 
 	def save_image_results(self):
-		#Function to save every image from test dataset and its predicted mask
 		ids = np.arange(len(test_dataset))
-		SAVE_DIR = self.resultpath + "test_results/"
-		if not os.path.exists(SAVE_DIR):
-			os.mkdir(SAVE_DIR)
 		for i in ids:
 			image, gt_mask = test_dataset[i]
 			image = np.expand_dims(image, axis=0)
 			pr_mask = model.predict(image).round()
-			plt.figure()
-			plt.subplot(1,2,1)
-			plt.imshow(image, cmap='bone')
-			plt.subplot(1,2,2)
-			plt.imshow(image, cmap='bone')
-			plt.imshow(pr_mask, alpha=0.5, cmap='nipy_spectral')
-			plt.savefig(SAVE_DIR + "result_" + self.test_dataset.ids[i])
 
-	def load_best_results(self):
-		self.model.load_weights(self.resultpath + "best_model.h5")
-		self.model.compile(self.optim, self.total_loss, self.metrics)
+			cv2.imwrite(self.resultpath + "raw_" + self.test_dataset.ids[i], image)
+			cv2.imwrite(self.resultpath + "gt_mask_" + self.test_dataset.ids[i], gt_mask)
+			cv2.imwrite(self.resultpath + "pr_mask_" + self.test_dataset.ids[i], pr_mask)
