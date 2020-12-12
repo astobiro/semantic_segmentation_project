@@ -171,7 +171,8 @@ class SegmentationModel:
 		    print("mean {}: {:.5}".format(metric.__name__, value))
 		    means.append([metric.__name__, value])
 		#Saves values on a csv
-		score = pd.DataFrame(data=[loss, means[0][1], means[1][1]], columns=["Loss", means[0][0], means[1][0]])
+
+		score = pd.DataFrame([[loss, means[0][1], means[1][1]]], columns=["Loss", means[0][0], means[1][0]])
 		score.to_csv(self.resultpath + "loss-mean_values.csv")
 
 	def iou_calc_save(self):
@@ -182,12 +183,13 @@ class SegmentationModel:
 
 	def save_image_results(self):
 		#Function to save every image from test dataset and its predicted mask
-		ids = np.arange(len(test_dataset))
+		ids = np.arange(len(self.test_dataset))
 		SAVE_DIR = self.resultpath + "test_results/"
 		if not os.path.exists(SAVE_DIR):
 			os.mkdir(SAVE_DIR)
+		input()
 		for i in ids:
-			image, gt_mask = test_dataset[i]
+			image, gt_mask = self.test_dataset[i]
 			image = np.expand_dims(image, axis=0)
 			pr_mask = model.predict(image).round()
 			plt.figure()
