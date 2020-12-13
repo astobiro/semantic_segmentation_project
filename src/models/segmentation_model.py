@@ -187,19 +187,20 @@ class SegmentationModel:
 		SAVE_DIR = self.resultpath + "test_results/"
 		if not os.path.exists(SAVE_DIR):
 			os.mkdir(SAVE_DIR)
-		input()
 		for i in ids:
 			image, gt_mask = self.test_dataset[i]
 			image = np.expand_dims(image, axis=0)
-			pr_mask = model.predict(image).round()
+			pr_mask = self.model.predict(image).round()
 			plt.figure()
 			plt.subplot(1,2,1)
-			plt.imshow(image, cmap='bone')
+			plt.imshow(image.squeeze(), cmap='bone')
 			plt.subplot(1,2,2)
-			plt.imshow(image, cmap='bone')
-			plt.imshow(pr_mask, alpha=0.5, cmap='nipy_spectral')
+			plt.imshow(image.squeeze(), cmap='bone')
+			plt.imshow(pr_mask.squeeze(), alpha=0.5, cmap='nipy_spectral')
 			plt.savefig(SAVE_DIR + "result_" + self.test_dataset.ids[i])
+			plt.close()
 
 	def load_best_results(self):
+		#Function to load the best weights into the model to try other things
 		self.model.load_weights(self.resultpath + "best_model.h5")
 		self.model.compile(self.optim, self.total_loss, self.metrics)
