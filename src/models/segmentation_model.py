@@ -172,7 +172,7 @@ class SegmentationModel:
 		    means.append([metric.__name__, value])
 		#Saves values on a csv
 
-		score = pd.DataFrame([[loss, means[0][1], means[1][1]]], columns=["Loss", means[0][0], means[1][0]])
+		score = pd.DataFrame([[self.train_time, loss, means[0][1], means[1][1]]], columns=["Train time", "Loss", means[0][0], means[1][0]])
 		score.to_csv(self.resultpath + "loss-mean_values.csv")
 
 	def iou_calc_save(self):
@@ -192,15 +192,22 @@ class SegmentationModel:
 			image = np.expand_dims(image, axis=0)
 			pr_mask = self.model.predict(image).round()
 			plt.figure()
-			plt.subplot(1,2,1)
+			plt.subplot(1,3,1)
 			plt.imshow(image.squeeze(), cmap='bone')
-			plt.subplot(1,2,2)
+			plt.title("Image")
+			plt.subplot(1,3,2)
+			plt.imshow(image.squeeze(), cmap='bone')
+			plt.imshow(gt_mask.squeeze(), alpha=0.5, cmap='nipy_spectral')
+			plt.title("Ground Truth")
+			plt.subplot(1,3,3)
 			plt.imshow(image.squeeze(), cmap='bone')
 			plt.imshow(pr_mask.squeeze(), alpha=0.5, cmap='nipy_spectral')
+			plt.title("Predicted mask")
 			plt.savefig(SAVE_DIR + "result_" + self.test_dataset.ids[i])
 			plt.close()
+		print("All results saved on: " + SAVE_DIR)
 
 	def load_best_results(self):
-		#Function to load the best weights into the model to try other things
 		self.model.load_weights(self.resultpath + "best_model.h5")
 		self.model.compile(self.optim, self.total_loss, self.metrics)
+		print("Loaded weights.")
