@@ -11,5 +11,6 @@
 	"test_dataframepath" :"data/datasets/dataset2D-384x384/n1_test_dataframe.csv",
 	"valid_dataframepath" :"data/datasets/dataset2D-384x384/n1_valid_dataframe.csv",
     "TESTNO" : "n1",
-    "IMAGE_SIZE" : 384
+    "IMAGE_SIZE" : 384,
+    "load" : "n"
 }

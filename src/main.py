@@ -31,10 +31,20 @@ def main():
 
 	model.define_model()
 
-	model.fit_model()
+	if dataset.config.load == "n":
+		print("Starting training")
+		model.fit_model()
+	elif dataset.config.load == "y":
+		print("Loading weights")
+		model.load_best_results()
+	else:
+		print("load parameter error, terminating program")
+		return
 
 	model.evaluate_model()
 
 	model.iou_calc_save()
+
+	model.save_image_results()
 if __name__ == '__main__':
 	main()
