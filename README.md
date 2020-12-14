@@ -1,4 +1,4 @@
-# semantic_segmentation_project
+# semantic_segmentation_project / Sistema para segmentação de estruturas de interesse em imagens médicas baseado em deep learning
 Semantic segmentation of covid 19 images found in https://www.kaggle.com/andrewmvd/covid19-ct-scans
 
 # Dependencies:
