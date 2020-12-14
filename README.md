@@ -13,7 +13,7 @@ To install necessary library run:
   pip install efficientnet==1.0.0
 ```
 
-After cloning the repo, just run a command line from the root directory (folder semantic_segmentation_project) the command: python src/main.py config.json the code that will execute will train the net with parameters of the file config.json. The config.json file on the repo is this one:
+After cloning the repo, just run a command line from the root directory (folder semantic_segmentation_project). Run the command: python src/main.py config.json the code that will execute will train the net with parameters of the file config.json. The config.json file on the repo is this one:
 ```json
 {
     "BACKBONE" : "efficientnetb3",
